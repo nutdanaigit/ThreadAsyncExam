@@ -19,7 +19,9 @@ public class MainTwoActivity extends AppCompatActivity {
     private TextView mTextView;
     private Handler handler ;
     private String s;
-    private int temp;
+    private static final int CODE_SEND_COUNT= 2;
+    private static final int CODE_SEND_COUNT2 =3;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,7 +34,13 @@ public class MainTwoActivity extends AppCompatActivity {
         handler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
-                mTextView.setText(String.valueOf(temp));
+                //Sol 1
+//                mTextView.setText(String.valueOf(temp));
+                //Sol 2
+                if(msg.what == CODE_SEND_COUNT) {
+                    mTextView.setText(msg.obj.toString());
+                }
+
             }
         };
 
@@ -43,20 +51,45 @@ public class MainTwoActivity extends AppCompatActivity {
                 mTextView.setText(s);
 
                 new Thread(new Runnable() {
+                    private int temp;
+                    private Message mgs;
+
                     @Override
                     public void run() {
                         temp = Integer.valueOf(s);
                         while (true){
                             try{
+                                temp--;
+
                                 Thread.sleep(1000);
-                                handler.sendEmptyMessage(0);
+                                // Sol 2
+                                if(temp < 0){
+                                    mgs = handler.obtainMessage(CODE_SEND_COUNT,"Finish");
+                                    mgs.sendToTarget();
+                                    break;
+                                } else {
+
+                                    mgs = handler.obtainMessage(CODE_SEND_COUNT,temp);
+                                    mgs.sendToTarget();
+                                }
+
+                                // Sol 1
+//                                handler.sendEmptyMessage(0);
+                                // Sol 2
+//                                mgs = handler.obtainMessage(CODE_SEND_COUNT,temp);
+//                                mgs.sendToTarget();
+
+
                             }catch (Exception e){
 
                             }
-                            if(temp == 0){
-                                break;
-                            }
-                            temp--;
+
+//                            if(temp == 0){
+//                                mgs = handler.obtainMessage(CODE_SEND_COUNT,"Pearl");
+//                                mgs.sendToTarget();
+//                                break;
+//                            }
+
                         }
                     }
                 }).start();
